@@ -16,13 +16,20 @@ Autor: Grzegorz Pawlowski
 import arcpy, os, sys
 import features
 
+arcpy.DeleteField_management(in_table="OdcinekPoziomy", drop_field="XX1")
+
 #dane
 temp_loc = os.environ["Temp"]
 linie = "OdcinekPoziomy"
 raster = "Spagtest2"
 nazwa_pola = "XX2"
-#punkty = temp_loc + "\Points.shp"
+punkty = temp_loc + "\Points.shp"
 punkty_wart = temp_loc + "\Points_values.shp"
+
+#usuwanie temp-ow
+tempy = [punkty, punkty_wart, pts_values]
+for in_data in tempy:
+    arcpy.Delete_management(in_data, "")
 
 #--------------------------------------------------------------------------------------------------------#
 #   PRZYGOTOWANIE I KONWERSJA LINII 
