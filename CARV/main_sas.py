@@ -59,15 +59,11 @@ def ReadRasterValue(lines, field_name, points, raster):
 
     arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
 
+    return pts_values
+
 CreatePoints(linie, raster)
 
-#dodanie pola dla wartosci do tabeli lini
-arcpy.AddField_management(linie, nazwa_pola, "DOUBLE", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
-
-print "dodano pole " + nazwa_pola
-
-#odczyt z rastra do punktow
-arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, punkty_wart, "NONE", "VALUE_ONLY")
+punkty_wart = ReadRasterValue(linie, nazwa_pola, punkty, raster)
 
 #--------------------------------------------------------------------------------------------------------#
 #   LICZENIE I WPISYWANIE SREDNIEJ
