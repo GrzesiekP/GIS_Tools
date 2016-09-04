@@ -22,7 +22,7 @@ arcpy.DeleteField_management(in_table="OdcinekPoziomy", drop_field="XX1")
 temp_loc = os.environ["Temp"]
 linie = "OdcinekPoziomy"
 raster = "Spagtest2"
-nazwa_pola = "XX2"
+nazwa_pola = "XX1"
 punkty = temp_loc + "\Points.shp"
 punkty_wart = temp_loc + "\Points_values.shp"
 
