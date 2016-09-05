@@ -63,23 +63,6 @@ def ReadRasterValue(lines, field_name, points, raster):
 
     return pts_values
 
-CreatePoints(linie, raster)
-
-punkty_wart = ReadRasterValue(linie, nazwa_pola, punkty, raster)
-
-#--------------------------------------------------------------------------------------------------------#
-#   LICZENIE I WPISYWANIE SREDNIEJ
-#--------------------------------------------------------------------------------------------------------#
-
-#zmienne
-srednia = 0
-lista_id = []
-lista_val = []
-matrix = []
-srednie = []
-
-cur_pkt = arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"])
-
 def CreateIdList(cur_pkt):
     FID = 0
     for row in cur_pkt:
@@ -107,10 +90,6 @@ def CalculateMean(lista_id):
         srednie.append([ID,srednia])
     print srednie
 
-CreateIdList(cur_pkt)
-    
-CalculateMean(lista_id)
-
 def SaveResults(cur_lin, nazwa_pola):
     fields = ["FID", nazwa_pola]
     with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
@@ -121,6 +100,27 @@ def SaveResults(cur_lin, nazwa_pola):
                 if line[0] == ID:
                     line[1] = srednia
                     cur_lin.updateRow(line)
+
+CreatePoints(linie, raster)
+
+punkty_wart = ReadRasterValue(linie, nazwa_pola, punkty, raster)
+
+#--------------------------------------------------------------------------------------------------------#
+#   LICZENIE I WPISYWANIE SREDNIEJ
+#--------------------------------------------------------------------------------------------------------#
+
+#zmienne
+srednia = 0
+lista_id = []
+lista_val = []
+matrix = []
+srednie = []
+
+cur_pkt = arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"])
+
+CreateIdList(cur_pkt)
+    
+CalculateMean(lista_id)
 
 SaveResults(cur_lin, nazwa_pola)
 
