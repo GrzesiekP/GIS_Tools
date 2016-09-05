@@ -14,22 +14,24 @@ Autor: Grzegorz Pawlowski
 
 #importuj moduly
 import arcpy, os, sys
-import features
 
-arcpy.DeleteField_management(in_table="OdcinekPoziomy", drop_field="XX1")
+arcpy.DeleteField_management("D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp", "XX1")
 
 #dane
 temp_loc = os.environ["Temp"]
-linie = "OdcinekPoziomy"
-raster = "Spagtest2"
+linie = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
+raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
 nazwa_pola = "XX1"
 punkty = temp_loc + "\Points.shp"
 punkty_wart = temp_loc + "\Points_values.shp"
 
 #usuwanie temp-ow
-tempy = [punkty, punkty_wart, pts_values]
+tempy = [punkty, punkty_wart]
 for in_data in tempy:
-    arcpy.Delete_management(in_data, "")
+    try:
+        arcpy.Delete_management(in_data, "")
+    except NameError:
+        break
 
 #--------------------------------------------------------------------------------------------------------#
 #   PRZYGOTOWANIE I KONWERSJA LINII 
@@ -76,10 +78,9 @@ lista_val = []
 matrix = []
 srednie = []
 
-#wlasciwe liczenie
-with arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"]) as cur_pkt:
-    
-    #tworzenie listy ID
+cur_pkt = arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"])
+
+def CreateIdList(cur_pkt):
     FID = 0
     for row in cur_pkt:
         FID += 1        
@@ -90,8 +91,8 @@ with arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"]) as cur_pkt:
     print lista_id
     print lista_val
     print matrix
-    
-    #wyliczanie sredniej dla kazdego ID
+
+def CalculateMean(lista_id):
     for ID in lista_id:
         suma = 0
         ilosc = 0
@@ -106,16 +107,22 @@ with arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"]) as cur_pkt:
         srednie.append([ID,srednia])
     print srednie
 
-#wpisanie wynikow do linii
-fields = ["FID", nazwa_pola]
-with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
-    for line in cur_lin:
-        for row in srednie:
-            ID = row[0]
-            srednia = row[1]
-            if line[0] == ID:
-                line[1] = srednia
-                cur_lin.updateRow(line)
+CreateIdList(cur_pkt)
+    
+CalculateMean(lista_id)
+
+def SaveResults(cur_lin, nazwa_pola):
+    fields = ["FID", nazwa_pola]
+    with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
+        for line in cur_lin:
+            for row in srednie:
+                ID = row[0]
+                srednia = row[1]
+                if line[0] == ID:
+                    line[1] = srednia
+                    cur_lin.updateRow(line)
+
+SaveResults(cur_lin, nazwa_pola)
 
 #--------------------------------------------------------------------------------------------------------#
 #   CZYSZCZENIE
@@ -125,8 +132,3 @@ with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
 tempy = [punkty, punkty_wart]
 for in_data in tempy:
     arcpy.Delete_management(in_data, "")
-
-
-
-
-

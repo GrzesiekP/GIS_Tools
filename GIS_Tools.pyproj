@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4a73ff00-d390-47bc-814f-8ad79e064615}</ProjectGuid>
     <ProjectHome />
-    <StartupFile />
+    <StartupFile>CARV\main_sas.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
