@@ -15,51 +15,75 @@ Autor: Grzegorz Pawlowski
 #importuj moduly
 import arcpy, os, sys
 
-arcpy.DeleteField_management("D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp", "XX1")
-
 #dane
 temp_loc = os.environ["Temp"]
+tempy = [punkty, (temp_loc + "\Points_values.shp")]
 linie = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
 raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
 nazwa_pola = "XX1"
-punkty = temp_loc + "\Points.shp"
-punkty_wart = temp_loc + "\Points_values.shp"
-
-#usuwanie temp-ow
-tempy = [punkty, punkty_wart]
-for in_data in tempy:
-    try:
-        arcpy.Delete_management(in_data, "")
-    except NameError:
-        break
 
 #--------------------------------------------------------------------------------------------------------#
 #   PRZYGOTOWANIE I KONWERSJA LINII 
 #--------------------------------------------------------------------------------------------------------#
 
+def ClearTemps(temps):
+    for in_data in tempy:
+        try:
+            arcpy.Delete_management(in_data, "")
+        except NameError:
+            break
+
 def ReadCellSize(raster):
-    
-    description = arcpy.Describe(raster)
-    cellsize = description.children[0].meanCellHeight
+    #reads cell size of raster
+    description = arcpy.Describe(raster) #gets raster description
+    cellsize = description.children[0].meanCellHeight #gets cell size from description
     return cellsize
+
+def GetErrorCode():
+    #gets 6-numer code from current exception
+    e = sys.exc_info()[1] #current exception
+    error_message = e.args[0]
+    error_code = error_message[6:12]
+    return error_code
 
 def CreatePoints(lines, raster):
 
-    points = temp_loc + "\Points.shp"
-    cellsize = ReadCellSize(raster)
+    points = temp_loc + "\Points.shp" #path to temp file with points from line
+    cellsize = ReadCellSize(raster) #gets raster cellsize
     
-    dist = str(cellsize / 2) + " Meters"
-    arcpy.Densify_edit(lines, "DISTANCE", dist, "1 Meters", "10")
+    dist = str(cellsize / 2) + " Meters" #calculates distance between points as 1/2 of cellsize
+    arcpy.Densify_edit(lines, "DISTANCE", dist, "1 Meters", "10") #densifies line vertices to dist
 
-    arcpy.FeatureVerticesToPoints_management(lines, points, "ALL")
+    try:
+        arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices from lines to points
+    except arcpy.ExecuteError:
+        error_code = GetErrorCode() #gets error code
+        if error_code == '000725' or error_code == '000872': #if code means that points already exist
+            arcpy.Delete_management(points, "") #deletes old points
+            arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices again
+        else: #if it's other error, prints message
+            print 'Process broken by error. Info below:'
+            print error_message
 
-def ReadRasterValue(lines, field_name, points, raster):
+    return points #returns path to created points
 
+def ReadRasterValue(lines, field_name, raster):
+
+    punkty = temp_loc + "\Points.shp"
     pts_values = temp_loc + "\Points_values.shp"
 
     arcpy.AddField_management(lines, field_name, "DOUBLE", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
 
-    arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
+    try:
+        arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
+    except arcpy.ExecuteError:
+        error_code = GetErrorCode() #gets error code
+        if error_code == '000725' or error_code == '000872': #if code means that data already exist
+            arcpy.Delete_management(pts_values, "") #deletes old data
+            arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
+        else: #if it's other error, prints message
+            print 'Process broken by error. Info below:'
+            print error_message
 
     return pts_values
 
@@ -102,8 +126,7 @@ def SaveResults(cur_lin, nazwa_pola):
                     cur_lin.updateRow(line)
 
 CreatePoints(linie, raster)
-
-punkty_wart = ReadRasterValue(linie, nazwa_pola, punkty, raster)
+punkty_wart = ReadRasterValue(linie, nazwa_pola, raster)
 
 #--------------------------------------------------------------------------------------------------------#
 #   LICZENIE I WPISYWANIE SREDNIEJ
@@ -129,6 +152,4 @@ SaveResults(cur_lin, nazwa_pola)
 #--------------------------------------------------------------------------------------------------------#
             
 #usuwanie temp-ow
-tempy = [punkty, punkty_wart]
-for in_data in tempy:
-    arcpy.Delete_management(in_data, "")
+ClearTemps(tempy)
