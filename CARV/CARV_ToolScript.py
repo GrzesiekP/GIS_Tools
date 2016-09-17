@@ -8,8 +8,7 @@ Author: Grzegorz Pawlowski grzechu435@gmail.com
 #--------------------------------------------------------------------------------------------------------#
 '''
 
-#This is stand-alone script and it can be run by copying it to Python command line in ArcGIS with proper parameters in INTRO section (change only cur_lin, raster and field_name!!!).
-#For sript working with tool, see CARV_ToolScript.py
+#This is script, which can be imported into tool. (not yet - under construction!).
 
 #--------------------------------------------------------------------------------------------------------#
 #   INTRO
@@ -21,9 +20,9 @@ import arcpy, os, sys
 #data
 temp_loc = os.environ["Temp"]
 temps = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
-cur_lin = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
-raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
-field_name = "XX1"
+cur_lin = arcpy.GetParameterAsText(0)
+raster = arcpy.GetParameterAsText(1)
+field_name = arcpy.GetParameterAsText(2)
 
 #--------------------------------------------------------------------------------------------------------#
 #   DEFINE FUNCTIONS
@@ -39,16 +38,15 @@ def ClearTemps(temps):
 def ReadCellSize(raster):
     #reads cell size of raster
     description = arcpy.Describe(raster) #gets raster description
-    print (description)
     cellsize = description.children[0].meanCellHeight #gets cell size from description
     return cellsize
 
-def GetErrorCode():
+def GetErrorCodeAndMessage():
     #gets 6-numer code from current exception
     e = sys.exc_info()[1] #current exception
     error_message = e.args[0]
     error_code = error_message[6:12]
-    return error_code
+    return error_code, error_message
 
 def CreatePoints(lines, raster):
 
@@ -61,7 +59,7 @@ def CreatePoints(lines, raster):
     try:
         arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices from lines to points
     except arcpy.ExecuteError:
-        error_code = GetErrorCode() #gets error code
+        error_code, error_message = GetErrorCodeAndMessage() #gets error code
         if error_code == '000725' or error_code == '000872': #if code means that points already exist
             arcpy.Delete_management(points, "") #deletes old points
             arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices again
@@ -81,7 +79,7 @@ def ReadRasterValue(lines, field_name, raster):
     try:
         arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
     except arcpy.ExecuteError:
-        error_code = GetErrorCode() #gets error code
+        error_code, error_message = GetErrorCodeAndMessage() #gets error code
         if error_code == '000725' or error_code == '000872': #if code means that data already exist
             arcpy.Delete_management(pts_values, "") #deletes old data
             arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
