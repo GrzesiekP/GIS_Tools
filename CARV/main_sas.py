@@ -17,8 +17,8 @@ import arcpy, os, sys
 
 #dane
 temp_loc = os.environ["Temp"]
-tempy = [punkty, (temp_loc + "\Points_values.shp")]
-linie = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
+tempy = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
+cur_lin = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
 raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
 nazwa_pola = "XX1"
 
