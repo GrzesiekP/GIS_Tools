@@ -1,29 +1,29 @@
 '''
 #--------------------------------------------------------------------------------------------------------#
-Wersja 1.1
-Utworzono: 16.09.2015
+Version 1.2
+Created: 2016-09-17
 Python 2.7
-ArcGIS 10.3.1
-Autor: Grzegorz Pawlowski
+ArcGIS 10.4.1
+Author: Grzegorz Pawlowski grzechu435@gmail.com
 #--------------------------------------------------------------------------------------------------------#
 '''
 
 #--------------------------------------------------------------------------------------------------------#
-#   WSTEP
+#   INTRO
 #--------------------------------------------------------------------------------------------------------#
 
-#importuj moduly
+#import moduless
 import arcpy, os, sys
 
-#dane
+#data
 temp_loc = os.environ["Temp"]
-tempy = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
+temps = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
 cur_lin = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
 raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
-nazwa_pola = "XX1"
+field_name = "XX1"
 
 #--------------------------------------------------------------------------------------------------------#
-#   PRZYGOTOWANIE I KONWERSJA LINII 
+#   DEFINE FUNCTIONS
 #--------------------------------------------------------------------------------------------------------#
 
 def ClearTemps(temps):
@@ -91,16 +91,16 @@ def CreateIdList(cur_pkt):
     FID = 0
     for row in cur_pkt:
         FID += 1        
-        if row[0] not in lista_id:
-            lista_id.append(row[0])            
-        lista_val.append(row[1])
+        if row[0] not in id_list:
+            id_list.append(row[0])            
+        values_list.append(row[1])
         matrix.append([row[0], row[1]])
-    print lista_id
-    print lista_val
+    print id_list
+    print values_list
     print matrix
 
-def CalculateMean(lista_id):
-    for ID in lista_id:
+def CalculateMean(id_list):
+    for ID in id_list:
         suma = 0
         ilosc = 0
         for row_q in matrix:
@@ -110,46 +110,45 @@ def CalculateMean(lista_id):
                 ilosc += 1
                 suma += valu
                 print str(row_q[0]) + " = " + str(ID)
-        srednia = float(suma)/float(ilosc)
-        srednie.append([ID,srednia])
-    print srednie
+        raster_average = float(suma)/float(ilosc)
+        aver_list.append([ID,raster_average])
+    print aver_list
 
-def SaveResults(cur_lin, nazwa_pola):
-    fields = ["FID", nazwa_pola]
+def SaveResults(cur_lin, field_name):
+    fields = ["FID", field_name]
     with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
         for line in cur_lin:
-            for row in srednie:
+            for row in aver_list:
                 ID = row[0]
-                srednia = row[1]
+                raster_average = row[1]
                 if line[0] == ID:
-                    line[1] = srednia
+                    line[1] = raster_average
                     cur_lin.updateRow(line)
 
 CreatePoints(linie, raster)
-punkty_wart = ReadRasterValue(linie, nazwa_pola, raster)
+points_values_temp = ReadRasterValue(linie, field_name, raster)
 
 #--------------------------------------------------------------------------------------------------------#
-#   LICZENIE I WPISYWANIE SREDNIEJ
+#   RUN FUNCTIONS
 #--------------------------------------------------------------------------------------------------------#
 
 #zmienne
-srednia = 0
-lista_id = []
-lista_val = []
+raster_average = 0
+id_list = []
+values_list = []
 matrix = []
-srednie = []
+aver_list = []
 
-cur_pkt = arcpy.da.SearchCursor(punkty_wart, ["ORIG_FID", "RASTERVALU"])
+cur_pkt = arcpy.da.SearchCursor(points_values_temp, ["ORIG_FID", "RASTERVALU"])
 
 CreateIdList(cur_pkt)
     
-CalculateMean(lista_id)
+CalculateMean(id_list)
 
-SaveResults(cur_lin, nazwa_pola)
+SaveResults(cur_lin, field_name)
 
 #--------------------------------------------------------------------------------------------------------#
-#   CZYSZCZENIE
+#   CLEAN TEMP
 #--------------------------------------------------------------------------------------------------------#
             
-#usuwanie temp-ow
-ClearTemps(tempy)
+ClearTemps(temps)
