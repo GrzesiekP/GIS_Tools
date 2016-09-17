@@ -24,12 +24,15 @@ cur_lin = arcpy.GetParameterAsText(0)
 raster = arcpy.GetParameterAsText(1)
 field_name = arcpy.GetParameterAsText(2)
 
+if len(field_name) > 10:
+    field_name = field_name[:10]
+
 #--------------------------------------------------------------------------------------------------------#
 #   DEFINE FUNCTIONS
 #--------------------------------------------------------------------------------------------------------#
 
 def ClearTemps(temps):
-    for in_data in tempy:
+    for in_data in temps:
         try:
             arcpy.Delete_management(in_data, "")
         except NameError:
@@ -71,18 +74,18 @@ def CreatePoints(lines, raster):
 
 def ReadRasterValue(lines, field_name, raster):
 
-    punkty = temp_loc + "\Points.shp"
+    my_points = temp_loc + "\Points.shp"
     pts_values = temp_loc + "\Points_values.shp"
 
     arcpy.AddField_management(lines, field_name, "DOUBLE", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
 
     try:
-        arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
+        arcpy.gp.ExtractValuesToPoints_sa(my_points, raster, pts_values, "NONE", "VALUE_ONLY")
     except arcpy.ExecuteError:
         error_code, error_message = GetErrorCodeAndMessage() #gets error code
         if error_code == '000725' or error_code == '000872': #if code means that data already exist
             arcpy.Delete_management(pts_values, "") #deletes old data
-            arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
+            arcpy.gp.ExtractValuesToPoints_sa(my_points, raster, pts_values, "NONE", "VALUE_ONLY")
         else: #if it's other error, prints message
             print 'Process broken by error. Info below:'
             print error_message
@@ -116,25 +119,25 @@ def CalculateMean(id_list):
         aver_list.append([ID,raster_average])
     print aver_list
 
-def SaveResults(cur_lin, field_name):
+def SaveResults(lines, field_name):
     fields = ["FID", field_name]
-    with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
-        for line in cur_lin:
+    with arcpy.da.UpdateCursor(lines, fields) as cursor:
+        for line in cursor:
             for row in aver_list:
                 ID = row[0]
                 raster_average = row[1]
                 if line[0] == ID:
                     line[1] = raster_average
-                    cur_lin.updateRow(line)
+                    cursor.updateRow(line)
 
-CreatePoints(linie, raster)
-points_values_temp = ReadRasterValue(linie, field_name, raster)
+CreatePoints(cur_lin, raster)
+points_values_temp = ReadRasterValue(cur_lin, field_name, raster)
 
 #--------------------------------------------------------------------------------------------------------#
 #   RUN FUNCTIONS
 #--------------------------------------------------------------------------------------------------------#
 
-#zmienne
+#variables
 raster_average = 0
 id_list = []
 values_list = []
