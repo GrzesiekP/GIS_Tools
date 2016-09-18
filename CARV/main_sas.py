@@ -21,7 +21,7 @@ import arcpy, os, sys
 #data
 temp_loc = os.environ["Temp"]
 temps = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
-cur_lin = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
+in_lines = "D:\KAMIENIEC\PROJEKT GIS\Dane\Odcinek2Poziomy.shp"
 raster = "D:\KAMIENIEC\PROJEKT GIS\Dane\GeobazaTestowa.gdb\Spagtest2"
 field_name = "XX1"
 
@@ -30,7 +30,7 @@ field_name = "XX1"
 #--------------------------------------------------------------------------------------------------------#
 
 def ClearTemps(temps):
-    for in_data in tempy:
+    for in_data in temps:
         try:
             arcpy.Delete_management(in_data, "")
         except NameError:
@@ -56,6 +56,9 @@ def CreatePoints(lines, raster):
     cellsize = ReadCellSize(raster) #gets raster cellsize
     
     dist = str(cellsize / 2) + " Meters" #calculates distance between points as 1/2 of cellsize
+
+    temp_lines = temp_loc + "\\temp_lines"
+    arcpy.FeatureClassToFeatureClass_conversion(lines, temp_loc, "temp_lines", "", "", "")
     arcpy.Densify_edit(lines, "DISTANCE", dist, "1 Meters", "10") #densifies line vertices to dist
 
     try:
@@ -68,6 +71,8 @@ def CreatePoints(lines, raster):
         else: #if it's other error, prints message
             print 'Process broken by error. Info below:'
             print error_message
+
+    arcpy.Delete_management(temp_lines, "")
 
     return points #returns path to created points
 
@@ -118,9 +123,9 @@ def CalculateMean(id_list):
         aver_list.append([ID,raster_average])
     print aver_list
 
-def SaveResults(cur_lin, field_name):
+def SaveResults(lines, field_name):
     fields = ["FID", field_name]
-    with arcpy.da.UpdateCursor(linie, fields) as cur_lin:
+    with arcpy.da.UpdateCursor(lines, fields) as cur_lin:
         for line in cur_lin:
             for row in aver_list:
                 ID = row[0]
@@ -129,8 +134,8 @@ def SaveResults(cur_lin, field_name):
                     line[1] = raster_average
                     cur_lin.updateRow(line)
 
-CreatePoints(linie, raster)
-points_values_temp = ReadRasterValue(linie, field_name, raster)
+CreatePoints(in_lines, raster)
+points_values_temp = ReadRasterValue(in_lines, field_name, raster)
 
 #--------------------------------------------------------------------------------------------------------#
 #   RUN FUNCTIONS
