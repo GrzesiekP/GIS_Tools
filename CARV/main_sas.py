@@ -18,6 +18,8 @@ Author: Grzegorz Pawlowski grzechu435@gmail.com
 #import moduless
 import arcpy, os, sys
 
+arcpy.env.overwriteOutput = True
+
 #data
 temp_loc = os.environ["Temp"]
 temps = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]

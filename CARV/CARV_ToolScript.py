@@ -17,6 +17,8 @@ Author: Grzegorz Pawlowski grzechu435@gmail.com
 #import moduless
 import arcpy, os, sys
 
+arcpy.env.overwriteOutput = True
+
 #data
 temp_loc = os.environ["Temp"]
 temps = [(temp_loc + "\Points.shp"), (temp_loc + "\Points_values.shp")]
@@ -57,18 +59,23 @@ def CreatePoints(lines, raster):
     cellsize = ReadCellSize(raster) #gets raster cellsize
     
     dist = str(cellsize / 2) + " Meters" #calculates distance between points as 1/2 of cellsize
+
+    temp_lines = temp_loc + "\\temp_lines"
+    arcpy.FeatureClassToFeatureClass_conversion(lines, temp_loc, "temp_lines", "", "", "")
     arcpy.Densify_edit(lines, "DISTANCE", dist, "1 Meters", "10") #densifies line vertices to dist
 
     try:
         arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices from lines to points
     except arcpy.ExecuteError:
-        error_code, error_message = GetErrorCodeAndMessage() #gets error code
+        error_code = GetErrorCode() #gets error code
         if error_code == '000725' or error_code == '000872': #if code means that points already exist
             arcpy.Delete_management(points, "") #deletes old points
             arcpy.FeatureVerticesToPoints_management(lines, points, "ALL") #convert vertices again
         else: #if it's other error, prints message
             print 'Process broken by error. Info below:'
             print error_message
+
+    arcpy.Delete_management(temp_lines, "")
 
     return points #returns path to created points
 
