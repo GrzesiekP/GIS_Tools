@@ -7,8 +7,7 @@ ArcGIS 10.4.1
 #--------------------------------------------------------------------------------------------------------#
 '''
 
-#This is stand-alone script and it can be run by copying it to Python command line in ArcGIS with proper parameters in INTRO section.
-#For sript working with tool, see IdMatch_ToolScript.py
+#This is script, which can be imported into tool.
 
 #--------------------------------------------------------------------------------------------------------#
 #   INTRO
@@ -21,10 +20,10 @@ from arcpy import env
 arcpy.env.overwriteOutput = True
 
 #parameters
-fromFC = 'Odcinek2Poziomy_FeatureVerti'
-toFC = 'Odcinek2Poziomy_t'
-output = 'Odcinek2Poziomy_t_new'
-tolerance = 1
+fromFC = sys.argv[1] #feature class with IDs
+toFC = sys.argv[2] #feature class without IDs
+output = sys.argv[3] #feature class
+tolerance = sys.argv[4] #any value
 
 tol = str(tolerance)+" Meters"
 

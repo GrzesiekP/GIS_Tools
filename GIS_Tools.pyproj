@@ -25,6 +25,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CARV\main_sas.py" />
+    <Compile Include="IdMatch\IdMatch_ToolScript.py" />
     <Compile Include="IdMatch\IdMatch_sas.py" />
   </ItemGroup>
   <ItemGroup>

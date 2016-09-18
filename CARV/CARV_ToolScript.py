@@ -8,7 +8,7 @@ Author: Grzegorz Pawlowski grzechu435@gmail.com
 #--------------------------------------------------------------------------------------------------------#
 '''
 
-#This is script, which can be imported into tool. (not yet - under construction!).
+#This is script, which can be imported into tool.
 
 #--------------------------------------------------------------------------------------------------------#
 #   INTRO
