@@ -16,9 +16,9 @@ from arcpy import env
 # Zmienna srodowiskowa, katalog operacyjny
 env.overwriteOutput = True
 
-in_file = sys.argv[1]
-out_file = sys.argv[2]
-workspace = sys.argv[3]
+in_file = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\ot.txt'
+workspace = os.environ['Temp']
+temp_loc = workspace
 env.workspace = workspace
 
 #--------------------------------------------------------------------------------------------------------#
@@ -30,7 +30,8 @@ dev = in_file
 d = open(dev, 'r')
 
 #otworz plik tekstowy wyjsciowy
-txt = workspace + '\wynik.txt'
+#txt = workspace + '\wynik.txt'
+txt = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\wynik.txt'
 o = open(txt, 'w')
 o.write('MD,X,Y,Z,TVD,DX,DY,AZIM,INCL\n')
 
@@ -54,19 +55,16 @@ for line in d:
     elif count > 13: #linie ponizej naglowka
         new_line = zamiana(line, spacje)
         new_line2 = new_line[1:] #usuwa przecinek z pierwszego miejsca
-        o.write(new_line2)
+        if new_line2[0] != "    " and new_line != "" and new_line2 != "\n" and new_line2[0] != ",":
+            o.write(new_line2)
 
 #zamknij pliki
 o.close()
 d.close()
 
-
-
 #--------------------------------------------------------------------------------------------------------#
 #   TWORZENIE LINI 3D Z PLIKU
 #--------------------------------------------------------------------------------------------------------#
-
-
 
 #-----------------Tworzenie pliku przystosowanego do konwersji na polilinie 3D---------------------------#
 
@@ -87,10 +85,10 @@ arcpy.FeatureClassToFeatureClass_conversion(out_event, out_path, outFC_name, "",
 
 #-------------------------------------#Tworzenie wlasciwej polilinii---------------------------------------#
 
-punkty = env.workspace + '\\' + 'Well_Points' #musi byc sciezka, zeby kinia dziedziczyla CRS po punktach
+punkty = env.workspace + '\\' + 'Well_Points.shp' #musi byc sciezka, zeby kinia dziedziczyla CRS po punktach
 
 #tworzy FC
-arcpy.CreateFeatureclass_management(env.workspace, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", punkty)
+arcpy.CreateFeatureclass_management(env.workspace, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", CRS)
 #arcpy.CreateFeatureclass_management(env.workspace, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", CRS, "", "0", "0", "0")
 
 #Rysuje polilinie
@@ -98,7 +96,7 @@ array = arcpy.Array()
 
 for row in arcpy.da.SearchCursor(punkty, ("OID@", "SHAPE@","Z")):
     
-        print "Punkt o ID", row[0]
+        print "Punkt o ID", row[0], " ", row[1]
         
         wsp_X = row[1].centroid.X
         wsp_Y = row[1].centroid.Y
@@ -123,4 +121,3 @@ tempy = [out_event, outFC_name]
 
 for t in tempy:
     arcpy.Delete_management(t, "")
-
