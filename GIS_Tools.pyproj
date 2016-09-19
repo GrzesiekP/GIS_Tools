@@ -27,10 +27,12 @@
     <Compile Include="CARV\main_sas.py" />
     <Compile Include="IdMatch\IdMatch_ToolScript.py" />
     <Compile Include="IdMatch\IdMatch_sas.py" />
+    <Compile Include="PetrelTo3DLine\PetrelDEVTo3DLine do narzedzia 2.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CARV" />
     <Folder Include="IdMatch\" />
+    <Folder Include="PetrelTo3DLine\" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />
