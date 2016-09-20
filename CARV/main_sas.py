@@ -50,7 +50,7 @@ def GetErrorCode():
     e = sys.exc_info()[1] #current exception
     error_message = e.args[0]
     error_code = error_message[6:12]
-    return error_code
+    return error_code, error_message
 
 def CreatePoints(lines, raster):
 
@@ -88,7 +88,7 @@ def ReadRasterValue(lines, field_name, raster):
     try:
         arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")
     except arcpy.ExecuteError:
-        error_code = GetErrorCode() #gets error code
+        error_code, error_message = GetErrorCode() #gets error code
         if error_code == '000725' or error_code == '000872': #if code means that data already exist
             arcpy.Delete_management(pts_values, "") #deletes old data
             arcpy.gp.ExtractValuesToPoints_sa(punkty, raster, pts_values, "NONE", "VALUE_ONLY")

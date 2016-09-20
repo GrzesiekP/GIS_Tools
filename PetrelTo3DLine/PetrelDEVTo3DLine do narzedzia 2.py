@@ -17,33 +17,30 @@ from arcpy import env
 env.overwriteOutput = True
 
 in_file = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\ot.txt'
-workspace = os.environ['Temp']
-temp_loc = workspace
-env.workspace = workspace
+temploc = os.environ['Temp'] # 'C:\\Users\\Grzechu\\AppData\\Local\\Temp'
+to_remove = []
 
 #--------------------------------------------------------------------------------------------------------#
 #   KONWERSJA PLIKU .dev na .txt akceptowany przez ArcGIS
 #--------------------------------------------------------------------------------------------------------#
 
 #otworz plik tekstowy
-dev = in_file
-d = open(dev, 'r')
+d = open(in_file, 'r')
 
 #otworz plik tekstowy wyjsciowy
-#txt = workspace + '\wynik.txt'
 txt = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\wynik.txt'
 o = open(txt, 'w')
 o.write('MD,X,Y,Z,TVD,DX,DY,AZIM,INCL\n')
+o.flush()
 
 #liasta spacj wystepujacych w plikach petrela oraz odwrocenie jej kolejnosci, zeby zamienialo od najwiekszej
-spacje = [' ', '  ', '   ', '	' ,'    ', '     ', '      ']
-spacje.reverse()
+spaces = [' ', '  ', '   ', '	' ,'    ', '     ', '      ', ' ']
+spaces.reverse()
 
 #funkcja zamieniajaca odstepy z listy przecinkami
-def zamiana(linia, lista):
-    nl = linia
-    for s in lista:
-        nl = nl.replace(s, ',')
+def ReplaceInLineFromList(line, list):
+    for s in list:
+        nl = line.replace(s, ',')
     return nl
 
 #wlasciwe formatowanie pliku     
@@ -53,14 +50,13 @@ for line in d:
     if count <= 13: #omija naglowek
         a = 0
     elif count > 13: #linie ponizej naglowka
-        new_line = zamiana(line, spacje)
-        new_line2 = new_line[1:] #usuwa przecinek z pierwszego miejsca
-        if new_line2[0] != "    " and new_line != "" and new_line2 != "\n" and new_line2[0] != ",":
-            o.write(new_line2)
-
-#zamknij pliki
-o.close()
-d.close()
+        #new_line = ReplaceInLineFromList(line, spaces)
+        #new_line2 = new_line[1:] #usuwa przecinek z pierwszego miejsca
+        nl = line.split()
+        print nl
+        if nl != "" and nl != "\n" and (",,,," not in nl) and (not (len(nl) == 0)): #TUTAJ ERRRORRROROROOR!
+            print (nl)
+            o.write(str(nl)
 
 #--------------------------------------------------------------------------------------------------------#
 #   TWORZENIE LINI 3D Z PLIKU
@@ -69,8 +65,8 @@ d.close()
 #-----------------Tworzenie pliku przystosowanego do konwersji na polilinie 3D---------------------------#
 
 #tymczasowe zmienne i lokalizacje
-out_event = os.environ["TEMP"] + 'TEMPEventLayer.shp'
-out_path = env.workspace + '\\'
+out_eventlayer = temploc + "\\" + 'TEMPEventLayer.shp'
+out_path = temploc + "\\"
 outFC_name = 'Well_Points'
 Well_Track = 'Well_Track1' #tu mozna pomyslec nad nazwa
 
@@ -85,24 +81,24 @@ arcpy.FeatureClassToFeatureClass_conversion(out_event, out_path, outFC_name, "",
 
 #-------------------------------------#Tworzenie wlasciwej polilinii---------------------------------------#
 
-punkty = env.workspace + '\\' + 'Well_Points.shp' #musi byc sciezka, zeby kinia dziedziczyla CRS po punktach
+points = temploc + 'Well_Points.shp' #musi byc sciezka, zeby kinia dziedziczyla CRS po punktach
+to_remove.append(points)
 
 #tworzy FC
-arcpy.CreateFeatureclass_management(env.workspace, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", CRS)
-#arcpy.CreateFeatureclass_management(env.workspace, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", CRS, "", "0", "0", "0")
+arcpy.CreateFeatureclass_management(temploc, "line3d", "POLYLINE", "", "DISABLED", "ENABLED", CRS)
 
 #Rysuje polilinie
 array = arcpy.Array()
 
-for row in arcpy.da.SearchCursor(punkty, ("OID@", "SHAPE@","Z")):
+for row in arcpy.da.SearchCursor(points, ("OID@", "SHAPE@","Z")):
     
         print "Punkt o ID", row[0], " ", row[1]
         
-        wsp_X = row[1].centroid.X
-        wsp_Y = row[1].centroid.Y
-        wsp_Z = row[1].centroid.Z
+        X = row[1].centroid.X
+        Y = row[1].centroid.Y
+        Z = row[1].centroid.Z
         
-        point = arcpy.Point(wsp_X,wsp_Y,wsp_Z)
+        point = arcpy.Point(X, Y, Z)
         array.append(point)
 
 
@@ -119,5 +115,5 @@ arcpy.RefreshActiveView()
 
 tempy = [out_event, outFC_name]
 
-for t in tempy:
-    arcpy.Delete_management(t, "")
+for t in to_remove:
+    os.remove(t)

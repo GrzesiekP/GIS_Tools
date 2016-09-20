@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4a73ff00-d390-47bc-814f-8ad79e064615}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>CARV\main_sas.py</StartupFile>
+    <StartupFile>PetrelTo3DLine\PT3.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -27,6 +27,9 @@
     <Compile Include="CARV\main_sas.py" />
     <Compile Include="IdMatch\IdMatch_ToolScript.py" />
     <Compile Include="IdMatch\IdMatch_sas.py" />
+    <Compile Include="PetrelTo3DLine\PT3.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PetrelTo3DLine\PetrelDEVTo3DLine do narzedzia 2.py" />
   </ItemGroup>
   <ItemGroup>
