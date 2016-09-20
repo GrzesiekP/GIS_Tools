@@ -30,7 +30,6 @@
     <Compile Include="PetrelTo3DLine\PT3.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PetrelTo3DLine\PetrelDEVTo3DLine do narzedzia 2.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CARV" />

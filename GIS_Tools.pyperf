@@ -4,4 +4,9 @@
     <TargetProject>4a73ff00-d390-47bc-814f-8ad79e064615</TargetProject>
     <FriendlyName>GIS_Tools</FriendlyName>
   </ProjectTarget>
+  <Reports>
+    <Report>
+      <Filename>C:\Users\Grzechu\AppData\Local\Temp\GIS_Tools_20160920.vsp</Filename>
+    </Report>
+  </Reports>
 </ProfilingTarget>
