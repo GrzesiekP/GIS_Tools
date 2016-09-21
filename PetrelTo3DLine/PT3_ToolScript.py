@@ -8,9 +8,9 @@ from arcpy import env
 env.overwriteOutput = True
 
 #define an output file and templocation
-in_path = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\ot.txt'
+in_path = sys.argv[0]
 temploc = os.environ['Temp']
-out_dir = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\nf\\wynik'
+out_dir = sys.argv[1]
 
 to_remove = []
 
@@ -18,7 +18,7 @@ to_remove = []
 d = open(in_path, 'r')
 
 #open the output file
-out_path = 'D:\\KAMIENIEC\\PROJEKT GIS\\Skrypty\\PetrelDEVTo3DLine\\wynik.txt' # ZMIEEEEEN NAAAAAAAAAAAAA TEMPPPPPPPPPPPP!!!!!!!!!!!!! #$!@$!#
+out_path = temploc + '\\wynik.txt' # ZMIEEEEEN NAAAAAAAAAAAAA TEMPPPPPPPPPPPP!!!!!!!!!!!!! #$!@$!#
 o = open(out_path, 'w')
 
 #write headers to the out file
